@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<title>学生课表管理中心 · 青岛耶胡迪梅纽因学校</title>
+<title>学生管理中心 · 青岛耶胡迪梅纽因学校</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <script>
 (function initializeScheduleClassification(global) {
@@ -506,6 +506,110 @@ table#schedule{border-collapse:separate;border-spacing:0;min-width:1100px;width:
 .data-tools .import-row{border-color:#dfe5f2;background:#fff;}
 .data-tools .operations-row{background:#fff;}
 
+/* ===== Student Directory workspace ===== */
+.workspace-tabs{display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;margin:0 0 20px;padding:5px;border:1px solid var(--border);border-radius:15px;background:#f7f9fc;}
+.workspace-tab{min-height:40px;padding:0 20px;border:0;border-radius:11px;background:transparent;color:var(--text-secondary);font-size:.84rem;font-weight:800;cursor:pointer;transition:var(--transition);}
+.workspace-tab:hover{color:var(--text-primary);background:#fff;}
+.workspace-tab.is-active{background:#fff;color:var(--primary-color);box-shadow:0 2px 8px rgba(36,53,91,.08);}
+.workspace-view[hidden]{display:none!important;}
+.student-library-workspace{display:block;}
+.student-library-heading{display:flex;align-items:center;justify-content:space-between;gap:28px;margin-bottom:18px;padding:22px 26px;border:1px solid var(--border);border-radius:18px;background:#fff;}
+.student-library-heading h2{font-size:1.3rem;letter-spacing:-.025em;}
+.student-library-heading p{max-width:700px;margin-top:6px;color:var(--text-secondary);font-size:.86rem;line-height:1.55;}
+.student-library-heading-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+.student-library-heading-actions .cloud-load-status{max-width:300px;}
+.library-button{min-height:44px;padding:0 16px;border:1px solid var(--border-strong);border-radius:10px;background:#fff;color:var(--text-primary);font-size:.88rem;font-weight:800;cursor:pointer;transition:var(--transition);}
+.library-button:hover{border-color:#aebbd3;background:#f7f9fc;}
+.library-button:disabled{opacity:.5;cursor:not-allowed;}
+.library-button-primary{border-color:var(--primary-color);background:var(--primary-color);color:#fff;}
+.library-button-primary:hover{border-color:var(--primary-hover);background:var(--primary-hover);}
+.library-button-ghost{background:#f7f9fc;}
+.library-button:focus-visible,.library-row-actions button:focus-visible,.library-schedule-close:focus-visible,.library-clear-button:focus-visible{outline:3px solid rgba(82,102,216,.25);outline-offset:2px;}
+.student-library-filters{display:flex;align-items:flex-end;column-gap:20px;row-gap:16px;flex-wrap:wrap;margin-bottom:16px;padding:20px 24px;border:1px solid var(--border);border-radius:14px;background:#f7f9fc;overflow:visible;}
+.student-library-filters label{display:grid;gap:8px;color:var(--text-secondary);font-size:.82rem;font-weight:800;}
+.library-filter-search{flex:1 1 320px;min-width:260px;}
+.library-filter{flex:0 1 170px;min-width:145px;}
+.student-library-filters input,.student-library-filters select{width:100%;height:44px;padding:0 13px;border:1px solid var(--border-strong);border-radius:10px;background:#fff;color:var(--text-primary);font:inherit;font-size:.92rem;outline:none;}
+.student-library-filters input:focus,.student-library-filters select:focus{position:relative;z-index:2;border-color:var(--primary-color);box-shadow:0 0 0 3px rgba(82,102,216,.12);}
+.library-clear-button{height:44px;padding:0 12px;border:0;background:transparent;color:var(--primary-color);font-size:.82rem;font-weight:800;cursor:pointer;}
+.student-library-summary{margin:0 4px 14px;color:var(--text-secondary);font-size:.86rem;line-height:1.5;}
+.student-library-layout{display:block;}
+.student-library-table-card,.student-library-preview{min-width:0;border:1px solid var(--border);border-radius:16px;background:#fff;}
+.student-library-table-wrap{max-height:min(680px,calc(100vh - 270px));overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;border-radius:16px;}
+.student-library-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:.94rem;}
+.student-library-table th{position:sticky;top:0;z-index:1;padding:15px 18px;border-bottom:1px solid var(--border);background:#f4f6fa;color:var(--text-secondary);font-size:.82rem;font-weight:850;letter-spacing:.02em;text-align:left;white-space:nowrap;}
+.student-library-table td{padding:15px 18px;border-bottom:1px solid #edf0f5;color:var(--text-primary);vertical-align:middle;overflow-wrap:anywhere;line-height:1.5;}
+.student-library-table tr:last-child td{border-bottom:0;}
+.student-library-table tr:hover td{background:#fbfcff;}
+.student-library-table tr[aria-current="true"] td{background:#f2f4ff;}
+.student-library-table tr[aria-current="true"] td:first-child{box-shadow:inset 3px 0 0 var(--primary-color);}
+.student-library-table th:nth-child(1),.student-library-table td:nth-child(1){width:19%;font-weight:800;}
+.student-library-table th:nth-child(2),.student-library-table td:nth-child(2){width:11%;}
+.student-library-table th:nth-child(3),.student-library-table td:nth-child(3){width:22%;}
+.student-library-table th:nth-child(4),.student-library-table td:nth-child(4){width:12%;}
+.student-library-table th:nth-child(5),.student-library-table td:nth-child(5){width:14%;color:var(--text-secondary);font-size:.82rem;}
+.student-library-table th:nth-child(6),.student-library-table td:nth-child(6){width:22%;}
+.library-student-name{display:flex;align-items:center;gap:10px;min-width:0;}
+.library-avatar{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex:0 0 34px;border:1px solid #d9e0ef;border-radius:10px;background:#eef1ff;color:var(--primary-color);font-size:.84rem;font-weight:850;}
+.library-name-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.library-pill{display:inline-flex;align-items:center;max-width:100%;padding:5px 11px;border:1px solid #dce3ef;border-radius:999px;background:#f6f8fb;color:#5a6880;font-size:.78rem;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.library-pill-status-active{border-color:#c9eadb;background:#eaf8f1;color:#23765d;}
+.library-pill-status-archived{border-color:#e1e5ec;background:#f1f3f6;color:#7a8495;}
+.library-row-actions{display:flex;align-items:center;gap:9px;flex-wrap:nowrap;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:2px;scrollbar-width:thin;}
+.library-row-actions button{min-height:38px;flex:0 0 auto;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:#f7f9fc;color:var(--text-secondary);font-size:.82rem;font-weight:800;cursor:pointer;white-space:nowrap;}
+.library-row-actions::-webkit-scrollbar{height:5px;}
+.library-row-actions::-webkit-scrollbar-thumb{border-radius:5px;background:#cbd4e4;}
+.library-row-actions button:hover{position:relative;z-index:1;border-color:#acb9d1;background:#eef1ff;color:var(--primary-color);transform:none;box-shadow:none;}
+.library-row-actions button.library-row-danger:hover{border-color:#e3b1b5;background:#fff0f1;color:#b33e49;}
+.student-library-empty{padding:52px 20px!important;color:var(--text-secondary)!important;text-align:center;}
+.student-library-preview{min-height:360px;padding:20px;position:sticky;top:14px;}
+.student-library-preview-empty{display:flex;min-height:320px;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.student-library-preview-empty[hidden],#studentLibraryPreviewContent[hidden]{display:none!important;}
+.student-library-preview-empty strong{color:var(--text-primary);font-size:.92rem;}
+.student-library-preview-empty span{max-width:260px;margin-top:6px;color:var(--text-secondary);font-size:.73rem;line-height:1.55;}
+.library-preview-icon{display:flex;width:50px;height:50px;align-items:center;justify-content:center;margin-bottom:13px;border:1px solid #d6def2;border-radius:15px;background:#e9edff;color:var(--primary-color);font-size:1.12rem;font-weight:850;}
+.student-library-preview-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.student-library-preview-header h3{font-size:1rem;letter-spacing:-.02em;}
+.student-library-preview-header p{margin-top:4px;color:var(--text-secondary);font-size:.72rem;line-height:1.45;}
+.readonly-badge{display:inline-flex;align-items:center;padding:4px 8px;border:1px solid #cdd6f4;border-radius:999px;background:#f0f2ff;color:var(--primary-color);font-size:.65rem;font-weight:850;white-space:nowrap;}
+.student-library-preview-table-wrap{overflow:auto;border:1px solid var(--border);border-radius:11px;}
+.student-library-preview-table{width:100%;min-width:560px;border-collapse:collapse;table-layout:fixed;font-size:.74rem;}
+.student-library-preview-table th{padding:10px 6px;border:1px solid #dce3ed;background:#f2f5fa;color:#43516c;font-size:.74rem;font-weight:800;text-align:center;white-space:nowrap;}
+.student-library-preview-table th:first-child{width:108px;background:#e9edff;color:#465bc0;}
+.student-library-preview-table td{height:46px;padding:7px 6px;border:1px solid #dce3ed;background:#fff;color:#17233d;line-height:1.35;text-align:center;vertical-align:middle;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;}
+.student-library-preview-table td:first-child{background:#f7f9fc;color:#52617d;font-weight:700;white-space:nowrap;}
+.student-library-preview-table td.is-filled{background:var(--library-cell-fill,#eaf0f8);color:var(--library-cell-text,#344c6a);font-weight:650;}
+.student-library-preview-note{margin-top:12px;color:var(--text-secondary);font-size:.76rem;line-height:1.55;}
+.student-library-preview-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.student-library-modal-open{overflow:hidden;}
+.library-schedule-modal{position:fixed;inset:0;z-index:1300;display:flex!important;align-items:center;justify-content:center;padding:clamp(12px,3vw,32px);background:rgba(16,27,52,.62);backdrop-filter:blur(6px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,visibility .2s ease;}
+.library-schedule-modal[hidden]{display:flex!important;}
+.library-schedule-modal.is-open{opacity:1;visibility:visible;pointer-events:auto;}
+.library-schedule-dialog{width:min(1280px,100%);max-height:min(900px,calc(100vh - 32px));display:flex;flex-direction:column;overflow:hidden;border:1px solid #dbe3f2;border-radius:20px;background:#fff;box-shadow:0 24px 70px rgba(12,28,66,.28);transform:translateY(14px) scale(.985);transition:transform .2s cubic-bezier(.22,.8,.3,1);}
+.library-schedule-modal.is-open .library-schedule-dialog{transform:translateY(0) scale(1);}
+.library-schedule-dialog-header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:24px 28px 20px;border-bottom:1px solid var(--border);background:#fff;}
+.library-schedule-dialog-header h2{margin-top:3px;color:var(--text-primary);font-size:1.15rem;letter-spacing:-.02em;}
+.library-schedule-dialog-header p{margin-top:5px;color:var(--text-secondary);font-size:.75rem;line-height:1.5;}
+.library-schedule-close{min-height:40px;padding:0 15px;border:1px solid var(--border);border-radius:10px;background:#f1f4f8;color:var(--text-primary);font-size:.8rem;font-weight:800;cursor:pointer;transition:var(--transition);}
+.library-schedule-close:hover{border-color:#aebbd3;background:#e9edf5;}
+.student-library-modal-body{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:24px 28px 30px;}
+.student-library-modal-body .student-library-preview{position:static;min-height:0;padding:0;border:0;}
+.student-library-modal-body .student-library-preview-empty{min-height:260px;}
+.student-library-modal-body .student-library-preview-table-wrap{max-height:none;overflow:visible;}
+#scheduleWorkspaceContent.workspace-focus-transition{animation:workspaceFocusTransition .42s ease both;}
+@keyframes workspaceFocusTransition{from{opacity:.55;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.library-dialog-backdrop{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(16,27,52,.56);backdrop-filter:blur(5px);}
+.library-dialog{width:min(500px,94vw);padding:28px;border:1px solid #dbe3f2;border-radius:18px;background:#fff;box-shadow:0 24px 70px rgba(12,28,66,.24);}
+.library-dialog h3{color:var(--text-primary);font-size:1.12rem;}
+.library-dialog-help{margin:7px 0 20px;color:var(--text-secondary);font-size:.78rem;line-height:1.6;}
+.library-dialog-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.library-dialog-field{display:grid;gap:7px;color:var(--text-secondary);font-size:.75rem;font-weight:800;}
+.library-dialog-field.full{grid-column:1 / -1;}
+.library-dialog-field input,.library-dialog-field select{width:100%;height:42px;padding:0 12px;border:1px solid var(--border-strong);border-radius:10px;background:#fff;color:var(--text-primary);font:inherit;font-size:.84rem;}
+.library-dialog-field input:focus,.library-dialog-field select:focus{border-color:var(--primary-color);outline:none;box-shadow:0 0 0 3px rgba(82,102,216,.12);}
+.library-dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+.library-dialog-message{min-height:19px;margin-top:11px;color:var(--danger-color);font-size:.76rem;line-height:1.45;}
+
 /* ===== Dialog overrides ===== */
 #dbSyncModal{background:rgba(16,27,52,.56)!important;backdrop-filter:blur(5px);}
 #dbSyncModal>div{border:1px solid #dbe3f2!important;border-radius:20px!important;box-shadow:0 24px 70px rgba(12,28,66,.24)!important;padding:26px 28px!important;}
@@ -610,6 +714,8 @@ body.schedule-auth-locked{overflow:hidden;}
   .header-kicker{margin-bottom:10px;}
   .header-badge{position:static;display:inline-flex;margin-top:15px;}
   .schedule-wrapper{padding:16px;}
+  .workspace-tabs{width:100%;}
+  .workspace-tab{flex:1;padding:0 10px;}
   .student-hub{padding:18px;border-radius:15px;}
   .student-hub-heading{display:grid;gap:12px;margin-bottom:16px;}
   .cloud-load-status{justify-self:start;max-width:100%;text-align:left;}
@@ -651,6 +757,21 @@ body.schedule-auth-locked{overflow:hidden;}
   .template-picker{grid-column:auto;}
   .template-picker-grid{grid-template-columns:1fr;}
   .student-form{padding:20px;}
+  .student-library-heading{display:grid;align-items:start;padding:18px;}
+  .student-library-heading-actions{justify-content:flex-start;}
+  .student-library-filters{align-items:stretch;}
+  .library-filter-search,.library-filter{min-width:100%;}
+  .library-clear-button{align-self:flex-start;}
+  .student-library-table{min-width:680px;}
+  .library-schedule-modal{padding:8px;}
+  .library-schedule-dialog{max-height:calc(100vh - 16px);border-radius:15px;}
+  .library-schedule-dialog-header{padding:17px 17px 14px;gap:10px;}
+  .library-schedule-dialog-header p{max-width:230px;}
+  .student-library-modal-body{padding:16px 17px 20px;}
+  .student-library-preview-header{align-items:flex-start;flex-direction:column;}
+  .student-library-preview-actions{width:100%;justify-content:space-between;}
+  .library-dialog-grid{grid-template-columns:1fr;}
+  .library-dialog-field.full{grid-column:auto;}
   .edit-meta{align-items:stretch;}
   .edit-meta label{width:100%;justify-content:space-between;}
   .edit-meta input{flex:1;min-width:0;}
@@ -665,8 +786,8 @@ body.schedule-auth-locked{overflow:hidden;}
         <div class="schedule-login-brand">
           <div class="schedule-login-logo">Y</div>
           <div>
-            <h1 id="scheduleLoginTitle">学生课表管理中心</h1>
-            <span>YMS Schedule Studio</span>
+            <h1 id="scheduleLoginTitle">学生管理中心</h1>
+            <span>青岛耶胡迪梅纽因学校</span>
           </div>
         </div>
         <form id="scheduleLoginForm" autocomplete="off">
@@ -686,7 +807,7 @@ body.schedule-auth-locked{overflow:hidden;}
   <div id="schedulePasswordModal" role="dialog" aria-modal="true" aria-labelledby="schedulePasswordTitle" hidden>
     <div class="schedule-password-dialog">
       <h2 id="schedulePasswordTitle">修改登录密码</h2>
-      <p class="schedule-password-help">修改后，琴房管理系统和学生课表管理中心将使用同一个新密码。</p>
+      <p class="schedule-password-help">修改后，琴房管理系统和学生管理中心将使用同一个新密码。</p>
       <form id="schedulePasswordChangeForm" autocomplete="off">
         <label>旧密码<input id="scheduleOldPassword" type="password" autocomplete="current-password" required /></label>
         <label>新密码<input id="scheduleNewPassword" type="password" autocomplete="new-password" minlength="6" required /></label>
@@ -702,13 +823,19 @@ body.schedule-auth-locked{overflow:hidden;}
 
   <div class="container" inert aria-hidden="true">
     <div class="header">
-      <div class="header-kicker"><span class="brand-mark">Y</span><span>YMS · SCHEDULE STUDIO</span></div>
-      <h1>学生课表管理中心</h1>
-      <p>登录后自动读取学生库和已有课表，选择学生即可查看、编辑或创建课表。</p>
+      <div class="header-kicker"><span class="brand-mark">Y</span><span>青岛耶胡迪梅纽因学校</span></div>
+      <h1>学生管理中心</h1>
+      <p>统一管理学生资料与课程表，选择学生即可查看、编辑或创建课表。</p>
       <span class="header-badge">登录后自动读取云端</span>
     </div>
 
     <main class="schedule-wrapper">
+      <nav class="workspace-tabs" aria-label="工作区切换" role="tablist">
+        <button type="button" class="workspace-tab is-active" id="workspaceTabSchedule" role="tab" aria-selected="true" aria-controls="scheduleWorkspaceContent">课表工作台</button>
+        <button type="button" class="workspace-tab" id="workspaceTabLibrary" role="tab" aria-selected="false" aria-controls="studentLibraryWorkspace">学生库</button>
+      </nav>
+
+      <div id="scheduleWorkspaceContent" class="workspace-view">
       <section class="student-hub" aria-labelledby="studentWorkspaceTitle">
         <div class="student-hub-heading">
           <div>
@@ -843,6 +970,69 @@ body.schedule-auth-locked{overflow:hidden;}
           </div>
         </div>
       </details>
+      </div>
+
+      <section id="studentLibraryWorkspace" class="workspace-view student-library-workspace" hidden aria-labelledby="studentLibraryTitle">
+        <div class="student-library-heading">
+          <div>
+            <span class="section-eyebrow">STUDENT DIRECTORY</span>
+            <h2 id="studentLibraryTitle">学生库</h2>
+            <p>统一管理学生资料；课表在这里仅提供只读查看，编辑请回到课表工作台。</p>
+          </div>
+          <div class="student-library-heading-actions">
+            <span id="studentLibraryStatus" class="cloud-load-status" role="status"></span>
+            <button type="button" id="studentLibraryRefresh" class="library-button library-button-ghost">刷新</button>
+            <button type="button" id="studentLibraryAdd" class="library-button library-button-primary">＋ 新增学生</button>
+          </div>
+        </div>
+
+        <div class="student-library-filters" role="search">
+          <label class="library-filter-search" for="studentLibrarySearch"><span>搜索</span><input id="studentLibrarySearch" type="search" placeholder="姓名、拼音或首字母" autocomplete="off" /></label>
+          <label class="library-filter" for="studentLibraryGrade"><span>年级</span><select id="studentLibraryGrade"><option value="">全部年级</option></select></label>
+          <label class="library-filter" for="studentLibraryMajor"><span>专业</span><select id="studentLibraryMajor"><option value="">全部专业</option></select></label>
+          <label class="library-filter" for="studentLibraryStatus"><span>状态</span><select id="studentLibraryStatus"><option value="active">在读</option><option value="">全部</option><option value="archived">已归档</option></select></label>
+          <button type="button" id="studentLibraryClear" class="library-clear-button" hidden>清除筛选</button>
+        </div>
+
+        <div class="student-library-summary" id="studentLibrarySummary">正在读取学生库…</div>
+
+        <div class="student-library-layout">
+          <div class="student-library-table-card">
+            <div class="student-library-table-wrap">
+              <table class="student-library-table">
+                <thead><tr><th>姓名</th><th>年级</th><th>专业</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
+                <tbody id="studentLibraryBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="studentLibraryScheduleModal" class="library-schedule-modal" hidden role="dialog" aria-modal="true" aria-labelledby="studentLibraryScheduleModalTitle">
+        <div class="library-schedule-dialog">
+          <div class="library-schedule-dialog-header">
+            <div><span class="section-eyebrow">STUDENT SCHEDULE</span><h2 id="studentLibraryScheduleModalTitle">学生课表</h2><p>查看当前学生的周课表</p></div>
+            <button type="button" class="library-schedule-close" id="studentLibraryScheduleClose" aria-label="关闭课表弹窗">关闭</button>
+          </div>
+          <div class="student-library-modal-body">
+            <section id="studentLibraryPreview" class="student-library-preview" aria-live="polite">
+              <div class="student-library-preview-empty" id="studentLibraryPreviewEmpty">
+                <div class="library-preview-icon">课</div>
+                <strong>选择学生查看课表</strong>
+                <span>课表会在此处显示。</span>
+              </div>
+              <div id="studentLibraryPreviewContent" hidden>
+                <div class="student-library-preview-header">
+                  <div><h3 id="studentLibraryPreviewName"></h3><p id="studentLibraryPreviewMeta"></p></div>
+                  <div class="student-library-preview-actions"><button type="button" class="library-button library-button-primary" id="studentLibraryEditSchedule">编辑课表</button></div>
+                </div>
+                <div class="student-library-preview-table-wrap"><table class="student-library-preview-table"><thead id="studentLibraryPreviewHead"></thead><tbody id="studentLibraryPreviewBody"></tbody></table></div>
+                <div class="student-library-preview-note" id="studentLibraryPreviewNote"></div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
     </main>
 
     <!-- 年级/专业同步预览弹窗 -->
@@ -912,6 +1102,8 @@ body.schedule-auth-locked{overflow:hidden;}
 /* ================= 数据模型与全局状态 ================= */
 const state = {
   students: [],            // [{id,name,grade,major, cells:{ [slotKey]: {day,time,text,practice,rest}}}]
+  directory: [],           // 学生库完整资料（含已归档学生）
+  directoryLoaded: false,
   // slotKey: "slotIndex_dayIndex"，cell.time 保存原始时间段
   timeAxis: [],            // 当前导入数据中的真实时间段并集
   dayNames: ['周一','周二','周三','周四','周五','周六','周日'],
@@ -4347,27 +4539,38 @@ async function fetchAllSupabaseRows(baseUrl,headers){
   return rows;
 }
 
-function mergeRemoteStudentRows(scheduleRows,databaseRows){
+function mergeRemoteStudentRows(scheduleRows,databaseRows,options={}){
+  const includeArchived = options.includeArchived === true;
   const schedules = new Map();
   scheduleRows.forEach(row=>{
     const rawName = String(row?.name || '').trim();
     const identity = normalizeStudentIdentity(rawName, row?.grade, row?.major);
     if(!rawName || !identity.name) return;
-    const normalizedRow = {...row, name:rawName, grade:identity.grade, major:identity.major};
+    const normalizedRow = {...row, name:identity.name, sourceName:rawName, grade:identity.grade, major:identity.major};
     const previous = schedules.get(identity.name);
     if(!previous || String(normalizedRow.updated_at || '') > String(previous.updated_at || '')) schedules.set(identity.name,normalizedRow);
   });
-  const database = [];
+  const databaseByName = new Map();
   databaseRows.forEach(row=>{
-    const name = String(row?.name || '').trim();
-    if(!name || row.archived === true) return;
-    database.push({
+    const sourceName = String(row?.name || '').trim();
+    const identity = normalizeStudentIdentity(sourceName, row?.grade, row?.major);
+    const name = identity.name || sourceName;
+    if(!name || (!includeArchived && row.archived === true)) return;
+    const normalized = {
       ...row,
       name,
+      sourceName,
       grade:String(row.grade || '').trim(),
-      major:String(row.major || '').trim()
-    });
+      major:String(row.major || '').trim(),
+      archived:row.archived === true
+    };
+    const previous = databaseByName.get(name);
+    const shouldReplace = !previous
+      || (previous.name !== previous.sourceName && normalized.name === normalized.sourceName)
+      || String(normalized.updated_at || '') > String(previous.updated_at || '');
+    if(shouldReplace) databaseByName.set(name, normalized);
   });
+  const database = [...databaseByName.values()];
   const matchedScheduleKeys = new Set();
   mergeRemoteStudentRows.lastStats = {
     scheduleCount: scheduleRows.length,
@@ -4381,9 +4584,12 @@ function mergeRemoteStudentRows(scheduleRows,databaseRows){
     const cells = schedule?.cells && typeof schedule.cells === 'object' && !Array.isArray(schedule.cells) ? schedule.cells : {};
     return {
       id: schedule?.id || createScheduleId(),
-      name:profile.name,
+      profileId:profile.id || null,
+      sourceName:profile.sourceName || profile.name,
+      name:canonicalName,
       grade:profile.grade || '',
       major:profile.major || '',
+      archived:profile.archived === true,
       cells,
       revision: schedule?.revision || 1,
       updated_at: schedule?.updated_at || null
@@ -4416,7 +4622,7 @@ async function loadRemoteStudents(options={}){
     return false;
   }
   try{
-    databaseRows = await fetchAllSupabaseRows(`${ctx.cfg.url}/rest/v1/student_database?select=name,grade,major,archived&order=name.asc`,ctx.headers);
+    databaseRows = await fetchAllSupabaseRows(`${ctx.cfg.url}/rest/v1/student_database?select=id,name,grade,major,archived,updated_at,created_at&order=name.asc`,ctx.headers);
     databaseLoaded = true;
   }catch(error){
     databaseError = error;
@@ -4427,7 +4633,10 @@ async function loadRemoteStudents(options={}){
     notify(`读取学生库失败：${databaseError?.message || '请检查网络后重试'}`,'warning',5000);
     return false;
   }
-  const remoteStudents = mergeRemoteStudentRows(scheduleRows,databaseRows);
+  const remoteDirectory = mergeRemoteStudentRows(scheduleRows,databaseRows,{includeArchived:true});
+  state.directory = remoteDirectory;
+  state.directoryLoaded = true;
+  const remoteStudents = remoteDirectory.filter(student=>student.archived !== true);
   if(remoteStudents.length === 0){
     state.students = [];
     state.currentIndex = -1;
@@ -4435,6 +4644,7 @@ async function loadRemoteStudents(options={}){
     rebuildTimeAxis();
     populateStudentSelect();
     renderTable();
+    if(typeof renderStudentLibrary === 'function') renderStudentLibrary();
     if(status) status.textContent = '✅ 学生库当前为空';
     return true;
   }
@@ -4451,6 +4661,7 @@ async function loadRemoteStudents(options={}){
   state.currentIndex = restoredIndex >= 0 ? restoredIndex : (state.students.length ? 0 : -1);
   if(state.currentIndex >= 0) setCurrentStudent(state.currentIndex);
   else renderTable();
+  if(typeof renderStudentLibrary === 'function') renderStudentLibrary();
   const loadNotes = [];
   if(normalizedPrefixCount) loadNotes.push(`已合并${normalizedPrefixCount}条带专业前缀的旧课表姓名`);
   if(ignoredScheduleCount) loadNotes.push(`已按学生库基准忽略${ignoredScheduleCount}名课表外学生`);
@@ -4598,6 +4809,7 @@ async function saveCurrentStudentSchedule(){
       cells:saved.cells || draftStudent.cells,
       revision:saved.revision || currentStudent.revision
     });
+    syncStudentLibraryMemory(currentStudent, oldName);
     state.timeAxis = [...new Set([...state.timeAxis, ...editor.model.axis])].map(normalizeTimeRange).filter(Boolean).sort(timeSorter);
     rebuildTimeAxis();
     populateStudentSelect();
@@ -4617,6 +4829,7 @@ async function saveCurrentStudentSchedule(){
     editor.suppressCellClickUntil = 0;
     closeStudentCellEditor();
     renderTable();
+    renderStudentLibrary();
     updateStudentEditorToolbar();
     if(status) status.textContent = '✅ 保存成功，已同步云端';
     if(syncStatus) syncStatus.textContent = `✅ “${currentStudent.name}”课表、练琴时段和学生资料已同步`;
@@ -5005,7 +5218,462 @@ async function confirmDbSync(){
   }
 }
 
+/* =============== 学生库工作区（课表工具内，课表只读） =============== */
+const studentLibraryUi = {
+  search: '',
+  grade: '',
+  major: '',
+  status: 'active',
+  selectedName: ''
+};
+
+function studentLibraryFormatTime(value){
+  if(!value) return '—';
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+
+function studentLibraryProfileName(student){
+  return normalizeStudentIdentity(student?.name || '', student?.grade || '', student?.major || '').name || String(student?.name || '').trim();
+}
+
+function studentLibraryFilteredRows(){
+  const query = studentLibraryUi.search.trim().toLowerCase();
+  return (state.directory || []).filter(student=>{
+    const name = studentLibraryProfileName(student);
+    if(query && !name.toLowerCase().includes(query) && !matchPinyin(name, query)) return false;
+    if(studentLibraryUi.grade && (student.grade || '未填写') !== studentLibraryUi.grade) return false;
+    if(studentLibraryUi.major && (student.major || '未填写') !== studentLibraryUi.major) return false;
+    if(studentLibraryUi.status && (student.archived ? 'archived' : 'active') !== studentLibraryUi.status) return false;
+    return true;
+  }).sort((left,right)=>{
+    const gradeCompare = String(left.grade || '').localeCompare(String(right.grade || ''),'zh-CN',{numeric:true});
+    return gradeCompare || String(left.name || '').localeCompare(String(right.name || ''),'zh-CN');
+  });
+}
+
+function studentLibrarySetOptions(select, values, allLabel, currentValue){
+  if(!select) return;
+  const normalizedValues = [...new Set(values.filter(Boolean).map(value=>String(value).trim()).filter(Boolean))]
+    .sort((left,right)=>left.localeCompare(right,'zh-CN',{numeric:true}));
+  select.replaceChildren(new Option(allLabel,''));
+  normalizedValues.forEach(value=>select.add(new Option(value,value)));
+  select.value = normalizedValues.includes(currentValue) ? currentValue : '';
+}
+
+function renderStudentLibraryFilters(){
+  const grades = (state.directory || []).map(student=>student.grade || '未填写');
+  const majors = (state.directory || []).map(student=>student.major || '未填写');
+  studentLibrarySetOptions(document.getElementById('studentLibraryGrade'), grades, '全部年级', studentLibraryUi.grade);
+  studentLibrarySetOptions(document.getElementById('studentLibraryMajor'), majors, '全部专业', studentLibraryUi.major);
+  const clearButton = document.getElementById('studentLibraryClear');
+  const hasFilter = !!(studentLibraryUi.search || studentLibraryUi.grade || studentLibraryUi.major || studentLibraryUi.status !== 'active');
+  if(clearButton) clearButton.hidden = !hasFilter;
+}
+
+function renderStudentLibraryPreview(student){
+  const empty = document.getElementById('studentLibraryPreviewEmpty');
+  const content = document.getElementById('studentLibraryPreviewContent');
+  const head = document.getElementById('studentLibraryPreviewHead');
+  const body = document.getElementById('studentLibraryPreviewBody');
+  const name = document.getElementById('studentLibraryPreviewName');
+  const meta = document.getElementById('studentLibraryPreviewMeta');
+  const note = document.getElementById('studentLibraryPreviewNote');
+  if(!empty || !content || !head || !body || !name || !meta || !note) return;
+  if(!student){
+    empty.hidden = false;
+    content.hidden = true;
+    return;
+  }
+  const displayName = studentLibraryProfileName(student);
+  const layout = studentDisplayLayout(student);
+  const axis = layout.axis || [];
+  const cells = layout.cells || {};
+  const dayNames = state.dayNames || ['周一','周二','周三','周四','周五'];
+  const hasScheduleOnDay = day => Object.values(cells).some(cell => Number(cell?.day) === day && hasScheduleCellContent(cell));
+  const visibleDayIndexes = dayNames.map((_, day) => day).filter(day => day < 5 || hasScheduleOnDay(day));
+  const visibleDayNames = visibleDayIndexes.map(day => dayNames[day]);
+  name.textContent = displayName || '未命名学生';
+  meta.textContent = `${student.grade || '未填写'} · ${student.major || '未填写'}${student.archived ? ' · 已归档' : ''}`;
+  head.innerHTML = `<tr><th>时间段</th>${visibleDayNames.map(day=>`<th>${esc(day)}</th>`).join('')}</tr>`;
+  if(!axis.length){
+    body.innerHTML = `<tr><td class="student-library-empty" colspan="${visibleDayNames.length + 1}">暂无课表记录</td></tr>`;
+    note.textContent = '暂无课表记录，可在课表工作台创建或编辑。';
+  }else{
+    body.innerHTML = axis.map(time=>{
+      const cellsHtml = visibleDayIndexes.map(day=>{
+        const cell = cells[`${time}|${day}`];
+        if(!cell || !hasScheduleCellContent(cell)) return '<td></td>';
+        const visual = scheduleVisual(cell);
+        const text = String(cell.text || '').trim() || (visual.kind === 'practice' ? '练琴' : visual.kind === 'rest' ? '休息' : '');
+        return `<td class="is-filled" style="--library-cell-fill:${esc(visual.fill)};--library-cell-text:${esc(visual.text)}">${esc(text)}</td>`;
+      }).join('');
+      return `<tr><td>${esc(time)}</td>${cellsHtml}</tr>`;
+    }).join('');
+    const practiceCount = Object.values(student.cells || {}).filter(cell=>resolvedCellKind(cell) === 'practice').length;
+    note.textContent = `共 ${axis.length} 个时间段 · ${practiceCount} 个练琴标记`;
+  }
+  empty.hidden = true;
+  content.hidden = false;
+}
+
+let studentLibraryScheduleCloseTimer = null;
+let studentLibraryScheduleModalOpener = null;
+
+function openStudentLibraryScheduleModal(student){
+  const modal = document.getElementById('studentLibraryScheduleModal');
+  const title = document.getElementById('studentLibraryScheduleModalTitle');
+  if(!modal || !student) return;
+  if(studentLibraryScheduleCloseTimer) clearTimeout(studentLibraryScheduleCloseTimer);
+  studentLibraryScheduleModalOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  if(title) title.textContent = '学生课表';
+  renderStudentLibraryPreview(student);
+  modal.hidden = false;
+  document.body.classList.add('student-library-modal-open');
+  requestAnimationFrame(()=>{ if(!modal.hidden) modal.classList.add('is-open'); });
+  document.getElementById('studentLibraryScheduleClose')?.focus();
+}
+
+function closeStudentLibraryScheduleModal(options={}){
+  const modal = document.getElementById('studentLibraryScheduleModal');
+  if(!modal) return Promise.resolve();
+  if(studentLibraryScheduleCloseTimer) clearTimeout(studentLibraryScheduleCloseTimer);
+  modal.classList.remove('is-open');
+  const finish = ()=>{
+    modal.hidden = true;
+    document.body.classList.remove('student-library-modal-open');
+    studentLibraryScheduleCloseTimer = null;
+    if(options.restoreFocus !== false && studentLibraryScheduleModalOpener?.isConnected){
+      studentLibraryScheduleModalOpener.focus();
+    }
+    studentLibraryScheduleModalOpener = null;
+  };
+  if(options.immediate){ finish(); return Promise.resolve(); }
+  return new Promise(resolve=>{
+    studentLibraryScheduleCloseTimer = setTimeout(()=>{ finish(); resolve(); },210);
+  });
+}
+
+async function editStudentScheduleFromLibrary(){
+  const student = studentLibraryFind(studentLibraryUi.selectedName);
+  if(!student) return;
+  if(student.archived){
+    notify('已归档学生不能直接编辑课表，请先恢复学生资料','warning',3500);
+    return;
+  }
+  const displayName = studentLibraryProfileName(student);
+  await closeStudentLibraryScheduleModal({restoreFocus:false});
+  await setScheduleWorkspaceTab('schedule');
+  const index = state.students.findIndex(item=>{
+    if(student.profileId != null && item.profileId != null) return String(item.profileId) === String(student.profileId);
+    return studentLibraryProfileName(item) === displayName;
+  });
+  if(index < 0){
+    notify(`课表工作台中暂未找到“${displayName}”的课表`,'warning',4000);
+    return;
+  }
+  setCurrentStudent(index);
+  const target = state.students[index];
+  requestAnimationFrame(()=>{
+    document.getElementById('scheduleWorkspaceContent')?.scrollIntoView({behavior:'smooth',block:'start'});
+    startStudentEditor(target);
+    const workspace = document.getElementById('scheduleWorkspaceContent');
+    workspace?.classList.add('workspace-focus-transition');
+    setTimeout(()=>workspace?.classList.remove('workspace-focus-transition'),420);
+  });
+}
+
+function renderStudentLibrary(){
+  const body = document.getElementById('studentLibraryBody');
+  const summary = document.getElementById('studentLibrarySummary');
+  if(!body || !summary) return;
+  renderStudentLibraryFilters();
+  const rows = studentLibraryFilteredRows();
+  const total = (state.directory || []).length;
+  const activeCount = (state.directory || []).filter(student=>!student.archived).length;
+  const archivedCount = total - activeCount;
+  summary.textContent = state.directoryLoaded
+    ? `显示 ${rows.length} / ${total} 名学生 · 在读 ${activeCount} · 已归档 ${archivedCount}`
+    : '正在读取学生库…';
+  if(!rows.length){
+    body.innerHTML = `<tr><td class="student-library-empty" colspan="6">${total ? '没有匹配的学生，请调整筛选条件。' : '暂无学生资料，可点击“新增学生”创建。'}</td></tr>`;
+  }else{
+    body.innerHTML = rows.map(student=>{
+      const name = studentLibraryProfileName(student);
+      const statusClass = student.archived ? 'library-pill-status-archived' : 'library-pill-status-active';
+      const selected = studentLibraryUi.selectedName === name ? ' aria-current="true"' : '';
+      return `<tr data-library-name="${esc(name)}"${selected}>
+        <td><div class="library-student-name"><span class="library-avatar">${esc(name.slice(0,1) || '?')}</span><span class="library-name-text" title="${esc(name)}">${esc(name)}</span></div></td>
+        <td>${esc(student.grade || '未填写')}</td>
+        <td>${esc(student.major || '未填写')}</td>
+        <td><span class="library-pill ${statusClass}">${student.archived ? '已归档' : '在读'}</span></td>
+        <td>${esc(studentLibraryFormatTime(student.updated_at || student.created_at))}</td>
+        <td><div class="library-row-actions">
+          <button type="button" data-library-act="view">查看课表</button>
+          <button type="button" data-library-act="edit">编辑资料</button>
+          <button type="button" data-library-act="archive">${student.archived ? '恢复' : '归档'}</button>
+          <button type="button" class="library-row-danger" data-library-act="delete">删除</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+  const selectedStudent = (state.directory || []).find(student=>studentLibraryProfileName(student) === studentLibraryUi.selectedName);
+  renderStudentLibraryPreview(selectedStudent || null);
+}
+
+function studentLibraryFind(name){
+  const target = normalizeStudentIdentity(name).name || String(name || '').trim();
+  return (state.directory || []).find(student=>studentLibraryProfileName(student) === target) || null;
+}
+
+function syncStudentLibraryMemory(student, previousName=''){
+  if(!student) return;
+  const identity = normalizeStudentIdentity(student.name, student.grade, student.major);
+  const canonicalName = identity.name || String(student.name || '').trim();
+  if(!canonicalName) return;
+  const previousCanonicalName = normalizeStudentIdentity(previousName).name;
+  const target = (state.directory || []).find(profile=>{
+    if(student.profileId != null && profile.profileId != null){
+      return String(profile.profileId) === String(student.profileId);
+    }
+    const profileName = studentLibraryProfileName(profile);
+    return profileName === canonicalName || (previousCanonicalName && profileName === previousCanonicalName);
+  });
+  const nextProfile = {
+    ...(target || {}),
+    profileId: student.profileId || target?.profileId || null,
+    sourceName: canonicalName,
+    name: canonicalName,
+    grade: identity.grade || student.grade || '',
+    major: identity.major || student.major || '',
+    archived: student.archived === true,
+    cells: student.cells && typeof student.cells === 'object' ? student.cells : {},
+    updated_at: new Date().toISOString()
+  };
+  if(target) Object.assign(target,nextProfile);
+  else state.directory = [...(state.directory || []),nextProfile];
+  state.directoryLoaded = true;
+}
+
+function closeStudentLibraryDialog(){
+  document.querySelectorAll('.library-dialog-backdrop').forEach(dialog=>dialog.remove());
+}
+
+async function saveStudentLibraryProfile(student, values){
+  const ctx = getSupabaseContext();
+  if(!ctx) throw new Error('云端连接不可用');
+  const identity = normalizeStudentIdentity(values.name, values.grade, values.major);
+  if(!identity.name) throw new Error('姓名不能为空');
+  const duplicate = (state.directory || []).find(item=>{
+    const sameName = studentLibraryProfileName(item) === identity.name;
+    const sameId = student && student.profileId && item.profileId && String(student.profileId) === String(item.profileId);
+    return sameName && !sameId;
+  });
+  if(duplicate) throw new Error(`学生库中已经存在“${identity.name}”，请直接编辑已有学生`);
+  const endpoint = `${ctx.cfg.url}/rest/v1/student_database`;
+  const payload = {
+    name: identity.name,
+    grade: identity.grade || '',
+    major: identity.major || '未填写',
+    archived: student?.archived === true
+  };
+  const filter = student?.profileId != null
+    ? `id=eq.${encodeURIComponent(student.profileId)}`
+    : `name=eq.${encodeURIComponent(student?.sourceName || student?.name || identity.name)}`;
+  if(student){
+    await supabaseRequest(`${endpoint}?${filter}`,{method:'PATCH',headers:{...ctx.headers,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
+  }else{
+    await supabaseRequest(endpoint,{method:'POST',headers:{...ctx.headers,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+  }
+  return identity.name;
+}
+
+function openStudentLibraryProfileDialog(student=null){
+  closeStudentLibraryDialog();
+  const backdrop = document.createElement('div');
+  backdrop.className = 'library-dialog-backdrop';
+  backdrop.innerHTML = `<form class="library-dialog" role="dialog" aria-modal="true" aria-labelledby="libraryDialogTitle">
+    <h3 id="libraryDialogTitle">${student ? '编辑学生资料' : '新增学生'}</h3>
+    <p class="library-dialog-help">学生姓名会按系统规范自动去除多余空格；课表内容不会在此处被修改。</p>
+    <div class="library-dialog-grid">
+      <label class="library-dialog-field full">姓名 *<input name="name" required maxlength="40" value="${esc(studentLibraryProfileName(student) || '')}" placeholder="例如：王淇" /></label>
+      <label class="library-dialog-field">年级<input name="grade" maxlength="20" value="${esc(student?.grade || '')}" placeholder="例如 G10-1" /></label>
+      <label class="library-dialog-field">专业 / 教研室<input name="major" maxlength="60" value="${esc(student?.major || '')}" placeholder="例如 钢琴教研室" /></label>
+    </div>
+    <div class="library-dialog-message" aria-live="polite"></div>
+    <div class="library-dialog-actions"><button type="button" class="library-button library-button-ghost" data-library-dialog-cancel>取消</button><button type="submit" class="library-button library-button-primary">保存资料</button></div>
+  </form>`;
+  document.body.appendChild(backdrop);
+  const form = backdrop.querySelector('form');
+  const message = backdrop.querySelector('.library-dialog-message');
+  const submit = form.querySelector('button[type="submit"]');
+  const close = ()=>backdrop.remove();
+  backdrop.addEventListener('click',event=>{ if(event.target === backdrop) close(); });
+  backdrop.querySelector('[data-library-dialog-cancel]').onclick = close;
+  form.elements.name.focus();
+  form.onsubmit = async event=>{
+    event.preventDefault();
+    submit.disabled = true;
+    message.textContent = '保存中…';
+    try{
+      const nextName = await saveStudentLibraryProfile(student, {
+        name:form.elements.name.value.trim(),
+        grade:form.elements.grade.value.trim(),
+        major:form.elements.major.value.trim()
+      });
+      close();
+      studentLibraryUi.selectedName = nextName;
+      const loaded = await loadRemoteStudents({preferredName:nextName});
+      if(!loaded) throw new Error('资料已提交，但刷新学生库失败，请点击刷新重试');
+      const status = document.getElementById('studentLibraryStatus');
+      if(status) status.textContent = '✅ 学生资料已同步';
+      renderStudentLibrary();
+    }catch(error){
+      submit.disabled = false;
+      message.textContent = error?.message || String(error);
+    }
+  };
+}
+
+async function updateStudentLibraryArchive(student, archived){
+  const ctx = getSupabaseContext();
+  if(!ctx) throw new Error('云端连接不可用');
+  const endpoint = `${ctx.cfg.url}/rest/v1/student_database`;
+  const filter = student.profileId != null
+    ? `id=eq.${encodeURIComponent(student.profileId)}`
+    : `name=eq.${encodeURIComponent(student.sourceName || student.name)}`;
+  await supabaseRequest(`${endpoint}?${filter}`,{method:'PATCH',headers:{...ctx.headers,'Prefer':'return=minimal'},body:JSON.stringify({archived})});
+}
+
+async function deleteStudentLibraryProfile(student){
+  const ctx = getSupabaseContext();
+  if(!ctx) throw new Error('云端连接不可用');
+  const endpoint = `${ctx.cfg.url}/rest/v1/student_database`;
+  const filter = student.profileId != null
+    ? `id=eq.${encodeURIComponent(student.profileId)}`
+    : `name=eq.${encodeURIComponent(student.sourceName || student.name)}`;
+  await supabaseRequest(`${endpoint}?${filter}`,{method:'DELETE',headers:{...ctx.headers,'Prefer':'return=minimal'}});
+}
+
+async function handleStudentLibraryAction(action, name){
+  const student = studentLibraryFind(name);
+  if(!student) return;
+  if(action === 'view'){
+    studentLibraryUi.selectedName = studentLibraryProfileName(student);
+    renderStudentLibrary();
+    openStudentLibraryScheduleModal(student);
+    return;
+  }
+  if(action === 'edit'){
+    openStudentLibraryProfileDialog(student);
+    return;
+  }
+  if(action === 'archive'){
+    const nextArchived = !student.archived;
+    const prompt = nextArchived ? `确认归档“${studentLibraryProfileName(student)}”？归档后默认不出现在课表工作台。` : `确认恢复“${studentLibraryProfileName(student)}”？`;
+    if(!confirm(prompt)) return;
+    try{
+      await updateStudentLibraryArchive(student,nextArchived);
+      studentLibraryUi.selectedName = nextArchived ? '' : studentLibraryProfileName(student);
+      await loadRemoteStudents({preferredName:studentLibraryUi.selectedName});
+      renderStudentLibrary();
+    }catch(error){ notify(`学生状态更新失败：${error?.message || error}`,'error',5000); }
+    return;
+  }
+  if(action === 'delete'){
+    const displayName = studentLibraryProfileName(student);
+    if(!confirm(`确定永久删除“${displayName}”吗？这会同时删除其课表和练琴时段，且不可恢复。`)) return;
+    try{
+      await deleteStudentLibraryProfile(student);
+      if(studentLibraryUi.selectedName === displayName) studentLibraryUi.selectedName = '';
+      await loadRemoteStudents({preferredName:''});
+      renderStudentLibrary();
+      notify(`已删除学生：${displayName}`,'success',3500);
+    }catch(error){ notify(`删除学生失败：${error?.message || error}`,'error',5000); }
+  }
+}
+
+async function setScheduleWorkspaceTab(tab){
+  const scheduleView = document.getElementById('scheduleWorkspaceContent');
+  const libraryView = document.getElementById('studentLibraryWorkspace');
+  const scheduleTab = document.getElementById('workspaceTabSchedule');
+  const libraryTab = document.getElementById('workspaceTabLibrary');
+  const showLibrary = tab === 'library';
+  if(scheduleView) scheduleView.hidden = showLibrary;
+  if(libraryView) libraryView.hidden = !showLibrary;
+  if(scheduleTab){ scheduleTab.classList.toggle('is-active',!showLibrary); scheduleTab.setAttribute('aria-selected',String(!showLibrary)); }
+  if(libraryTab){ libraryTab.classList.toggle('is-active',showLibrary); libraryTab.setAttribute('aria-selected',String(showLibrary)); }
+  if(!showLibrary) return;
+  renderStudentLibrary();
+  if(!state.remoteLoaded && state.remoteReady){
+    const status = document.getElementById('studentLibraryStatus');
+    if(status) status.textContent = '☁ 正在读取学生库…';
+    try{ await state.remoteReady; }catch(_){ }
+    if(showLibrary) renderStudentLibrary();
+  }
+}
+
+function initStudentLibraryWorkspace(){
+  const scheduleTab = document.getElementById('workspaceTabSchedule');
+  const libraryTab = document.getElementById('workspaceTabLibrary');
+  const search = document.getElementById('studentLibrarySearch');
+  const grade = document.getElementById('studentLibraryGrade');
+  const major = document.getElementById('studentLibraryMajor');
+  const status = document.getElementById('studentLibraryStatus');
+  const clear = document.getElementById('studentLibraryClear');
+  const body = document.getElementById('studentLibraryBody');
+  scheduleTab?.addEventListener('click',()=>{ void setScheduleWorkspaceTab('schedule'); });
+  libraryTab?.addEventListener('click',()=>{ void setScheduleWorkspaceTab('library'); });
+  search?.addEventListener('input',event=>{ studentLibraryUi.search = event.target.value; renderStudentLibrary(); });
+  grade?.addEventListener('change',event=>{ studentLibraryUi.grade = event.target.value; renderStudentLibrary(); });
+  major?.addEventListener('change',event=>{ studentLibraryUi.major = event.target.value; renderStudentLibrary(); });
+  status?.addEventListener('change',event=>{ studentLibraryUi.status = event.target.value; renderStudentLibrary(); });
+  clear?.addEventListener('click',()=>{
+    studentLibraryUi.search = ''; studentLibraryUi.grade = ''; studentLibraryUi.major = ''; studentLibraryUi.status = 'active';
+    if(search) search.value = '';
+    if(status) status.value = 'active';
+    renderStudentLibrary();
+  });
+  document.getElementById('studentLibraryAdd')?.addEventListener('click',()=>openStudentLibraryProfileDialog());
+  const scheduleModal = document.getElementById('studentLibraryScheduleModal');
+  document.getElementById('studentLibraryScheduleClose')?.addEventListener('click',()=>{ void closeStudentLibraryScheduleModal(); });
+  document.getElementById('studentLibraryEditSchedule')?.addEventListener('click',()=>{ void editStudentScheduleFromLibrary(); });
+  scheduleModal?.addEventListener('click',event=>{
+    if(event.target === scheduleModal) void closeStudentLibraryScheduleModal();
+  });
+  document.addEventListener('keydown',event=>{
+    if(event.key === 'Escape' && scheduleModal && !scheduleModal.hidden){
+      event.preventDefault();
+      void closeStudentLibraryScheduleModal();
+    }
+  });
+  document.getElementById('studentLibraryRefresh')?.addEventListener('click',async event=>{
+    const button = event.currentTarget;
+    if(button.disabled) return;
+    button.disabled = true;
+    const statusEl = document.getElementById('studentLibraryStatus');
+    if(statusEl) statusEl.textContent = '☁ 正在刷新学生库…';
+    try{
+      await loadRemoteStudents({preferredName:studentLibraryUi.selectedName});
+      if(statusEl) statusEl.textContent = '✅ 学生库已刷新';
+    }catch(error){
+      if(statusEl) statusEl.textContent = `刷新失败：${error?.message || error}`;
+    }finally{ button.disabled = false; }
+  });
+  body?.addEventListener('click',event=>{
+    const row = event.target.closest('tr[data-library-name]');
+    if(!row) return;
+    const actionButton = event.target.closest('[data-library-act]');
+    const name = row.dataset.libraryName;
+    if(actionButton){ handleStudentLibraryAction(actionButton.dataset.libraryAct,name); return; }
+    handleStudentLibraryAction('view',name);
+  });
+  renderStudentLibrary();
+}
+
 document.getElementById('btnConfirmDbSync').addEventListener('click', confirmDbSync);
+initStudentLibraryWorkspace();
 initializeScheduleAuth();
 
 </script>
