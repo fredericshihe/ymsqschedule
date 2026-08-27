@@ -4628,7 +4628,7 @@ function mergeRemoteStudentRows(scheduleRows,databaseRows,options={}){
   return students.sort((a,b)=>a.grade.localeCompare(b.grade,'zh-CN',{numeric:true}) || a.name.localeCompare(b.name,'zh-CN'));
 }
 
-async function loadRemoteStudents(options={}){
+async function loadRemoteStudentsInternal(options={}){
   const status = document.getElementById('remoteLoadStatus');
   const ctx = getSupabaseContext();
   if(!ctx){
@@ -4698,6 +4698,25 @@ async function loadRemoteStudents(options={}){
     notify(`学生库是唯一基准，已隐藏 ${ignoredScheduleCount} 名课表外残留学生；如需恢复请先在学生库创建`, 'warning', 6500);
   }
   return true;
+}
+
+let remoteStudentsLoadInFlight = null;
+async function loadRemoteStudents(options={}){
+  const preferredName = String(options.preferredName || '').trim();
+  if(remoteStudentsLoadInFlight){
+    const loaded = await remoteStudentsLoadInFlight;
+    if(loaded && preferredName){
+      const preferredIndex = state.students.findIndex(student=>student.name === preferredName);
+      if(preferredIndex >= 0 && preferredIndex !== state.currentIndex) setCurrentStudent(preferredIndex);
+    }
+    return loaded;
+  }
+  remoteStudentsLoadInFlight = loadRemoteStudentsInternal(options);
+  try{
+    return await remoteStudentsLoadInFlight;
+  }finally{
+    remoteStudentsLoadInFlight = null;
+  }
 }
 
 async function ensureScheduleNameAvailable(ctx, name, scheduleId, oldName){
