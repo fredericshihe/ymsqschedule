@@ -5614,6 +5614,7 @@ async function deleteStudentLibraryProfiles(students){
     if(!student) return;
     const profileId = student.profileId == null ? '' : String(student.profileId).trim();
     const name = studentLibraryProfileName(student) || String(student.sourceName || student.name || '').trim();
+    const deleteName = String(student.sourceName || student.name || name).trim();
     if(profileId){
       if(seenIds.has(profileId)) return;
       seenIds.add(profileId);
@@ -5622,7 +5623,7 @@ async function deleteStudentLibraryProfiles(students){
       if(!canonicalName || seenNames.has(canonicalName)) return;
       seenNames.add(canonicalName);
     }
-    uniqueStudents.push({student,profileId,name});
+    uniqueStudents.push({student,profileId,name,deleteName});
   });
   if(!uniqueStudents.length) throw new Error('没有可删除的学生');
   const ctx = getSupabaseContext();
@@ -5633,7 +5634,7 @@ async function deleteStudentLibraryProfiles(students){
     const chunk = ids.slice(i,i+80).map(value=>encodeURIComponent(value)).join(',');
     await supabaseRequest(`${endpoint}?id=in.(${chunk})`,{method:'DELETE',headers:{...ctx.headers,'Prefer':'return=minimal'}});
   }
-  const names = uniqueStudents.filter(item=>!item.profileId).map(item=>item.name).filter(Boolean);
+  const names = uniqueStudents.filter(item=>!item.profileId).map(item=>item.deleteName).filter(Boolean);
   for(let i=0;i<names.length;i+=60){
     const chunk = names.slice(i,i+60).map(value=>encodeURIComponent(value)).join(',');
     await supabaseRequest(`${endpoint}?name=in.(${chunk})`,{method:'DELETE',headers:{...ctx.headers,'Prefer':'return=minimal'}});
