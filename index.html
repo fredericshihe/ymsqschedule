@@ -389,7 +389,7 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none!important;box-shad
 #schedule td.editor-cell:active{cursor:grabbing;}
 #schedule td.editor-cell.is-selected-cell{outline:3px solid #7464d7;outline-offset:-3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),0 0 0 2px rgba(116,100,215,.14);}
 #schedule td.editor-cell.is-paste-target{animation:schedule-cell-paste .5s ease-out;}
-#schedule td.editor-cell.is-dragging{opacity:.45;transform:scale(.98);}
+#schedule td.editor-cell.is-dragging{opacity:1;transform:scale(.98);outline:3px solid #7464d7;outline-offset:-3px;box-shadow:inset 0 0 0 999px rgba(116,100,215,.14),0 0 0 3px rgba(116,100,215,.2);}
 #schedule td.editor-cell.is-drop-target{outline:3px solid var(--primary-color);outline-offset:-3px;background:#eaf0ff!important;}
 .editor-status.has-cell-selection{background:#eeeafd;color:#59489d;}
 @keyframes schedule-cell-paste{0%{box-shadow:inset 0 0 0 4px rgba(22,134,107,.88)}100%{box-shadow:inset 0 0 0 0 rgba(22,134,107,0)}}
@@ -2456,6 +2456,11 @@ function swapStudentEditorCells(from, to){
 function bindStudentEditorGrid(){
   const tbody = document.getElementById('tbody');
   if(!tbody || !state.editor.active) return;
+  tbody.onpointerdown = event=>{
+    if(event.button !== undefined && event.button !== 0) return;
+    const td = event.target.closest('td[data-editor-cell]');
+    if(td) selectStudentEditorCell(td.dataset.editorKey);
+  };
   tbody.onclick = event=>{
     if(Date.now() < state.editor.suppressCellClickUntil) return;
     const td = event.target.closest('td[data-editor-cell]');
@@ -2468,6 +2473,7 @@ function bindStudentEditorGrid(){
   tbody.ondragstart = event=>{
     const td = event.target.closest('td[data-editor-cell]');
     if(!td) return;
+    selectStudentEditorCell(td.dataset.editorKey);
     state.editor.dragging = true;
     state.editor.suppressCellClickUntil = Date.now() + 400;
     event.dataTransfer.effectAllowed = 'move';
