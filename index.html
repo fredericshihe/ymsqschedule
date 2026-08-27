@@ -387,8 +387,12 @@ button:disabled{opacity:.48;cursor:not-allowed;transform:none!important;box-shad
 .edit-meta input{min-width:130px;height:34px;padding:0 10px;border:1px solid var(--border-strong);border-radius:8px;font-size:.8rem;}
 #schedule td.editor-cell{cursor:grab;user-select:none;}
 #schedule td.editor-cell:active{cursor:grabbing;}
+#schedule td.editor-cell.is-selected-cell{outline:3px solid #7464d7;outline-offset:-3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),0 0 0 2px rgba(116,100,215,.14);}
+#schedule td.editor-cell.is-paste-target{animation:schedule-cell-paste .5s ease-out;}
 #schedule td.editor-cell.is-dragging{opacity:.45;transform:scale(.98);}
 #schedule td.editor-cell.is-drop-target{outline:3px solid var(--primary-color);outline-offset:-3px;background:#eaf0ff!important;}
+.editor-status.has-cell-selection{background:#eeeafd;color:#59489d;}
+@keyframes schedule-cell-paste{0%{box-shadow:inset 0 0 0 4px rgba(22,134,107,.88)}100%{box-shadow:inset 0 0 0 0 rgba(22,134,107,0)}}
 .cell-editor-popup{position:fixed;z-index:2000;width:300px;padding:15px;background:#fff;border:1px solid #d6def0;border-radius:14px;box-shadow:0 18px 50px rgba(20,36,72,.2);}
 .cell-editor-popup textarea{display:block;width:100%;min-height:94px;resize:vertical;padding:9px;border:1px solid var(--border-strong);border-radius:9px;font-size:.82rem;}
 .cell-editor-popup select{width:100%;min-width:0;margin-top:9px;height:36px;padding:0 9px;font-size:.78rem;}
@@ -737,7 +741,7 @@ body.schedule-auth-locked{overflow:hidden;}
           <div class="schedule-heading">
             <span class="section-eyebrow">CURRENT SCHEDULE</span>
             <h2 id="scheduleViewTitle">当前学生课表</h2>
-            <p>查看每周安排，进入编辑后可双击修改内容或拖拽互换格子。</p>
+            <p>编辑时单击选中格子，可显式复制并粘贴覆盖内容与类型；双击修改，拖拽互换。</p>
           </div>
           <div class="schedule-action-stack">
             <button id="btnEditStudent" disabled>编辑学生课表</button>
@@ -745,6 +749,8 @@ body.schedule-auth-locked{overflow:hidden;}
               <button class="btn-success" id="btnSaveStudent">保存并同步</button>
               <button class="btn-warning" id="btnCancelStudent">取消编辑</button>
               <button id="btnApplyStudentTemplate" title="选择其他学生的完整课表，覆盖当前编辑内容">套用其他学生课表</button>
+              <button id="btnCopyStudentCell" title="复制已选中格子的文字内容和课程类型">复制格子</button>
+              <button id="btnPasteStudentCell" title="用已复制的文字内容和课程类型覆盖当前选中格子">粘贴覆盖</button>
               <button class="btn-info" id="btnUndoStudent">撤销</button>
               <button class="btn-info" id="btnRedoStudent">重做</button>
               <span class="editor-status" id="studentEditorStatus"></span>
@@ -923,7 +929,12 @@ const state = {
     history: [],
     historyIndex: -1,
     dirty: false,
-    activeCellEditor: null
+    activeCellEditor: null,
+    selectedCellKey: '',
+    clipboardCell: null,
+    clipboardSourceKey: '',
+    dragging: false,
+    suppressCellClickUntil: 0
   }
 };
 
@@ -2097,6 +2108,16 @@ function rebuildTableHead(){
 
 function editorPlacementKey(time, day){ return `${time}|${day}`; }
 
+function editorPlacementDetails(placement){
+  const normalizedPlacement = String(placement || '');
+  const separator = normalizedPlacement.lastIndexOf('|');
+  if(separator < 0) return {time:'',day:-1,label:''};
+  const time = normalizedPlacement.slice(0,separator);
+  const day = Number(normalizedPlacement.slice(separator + 1));
+  const dayLabel = state.dayNames[day] || `第${day + 1}天`;
+  return {time,day,label:`${dayLabel} ${time}`};
+}
+
 function editorCellKind(cell){
   return hasScheduleCellContent(cell) ? resolvedCellKind(cell) : 'auto';
 }
@@ -2189,6 +2210,8 @@ function updateStudentEditorToolbar(){
   const saveBtn = document.getElementById('btnSaveStudent');
   const cancelBtn = document.getElementById('btnCancelStudent');
   const templateBtn = document.getElementById('btnApplyStudentTemplate');
+  const copyCellBtn = document.getElementById('btnCopyStudentCell');
+  const pasteCellBtn = document.getElementById('btnPasteStudentCell');
   const undoBtn = document.getElementById('btnUndoStudent');
   const redoBtn = document.getElementById('btnRedoStudent');
   const status = document.getElementById('studentEditorStatus');
@@ -2212,30 +2235,156 @@ function updateStudentEditorToolbar(){
   if(saveBtn) saveBtn.disabled = !dirty;
   if(cancelBtn) cancelBtn.disabled = false;
   if(templateBtn) templateBtn.style.display = editor.active && !editor.isNew ? '' : 'none';
+  const selectedCell = editor.active && editor.model && editor.selectedCellKey
+    ? editor.model.draft[editor.selectedCellKey]
+    : null;
+  if(editor.active && editor.selectedCellKey && !selectedCell) editor.selectedCellKey = '';
+  if(copyCellBtn) copyCellBtn.disabled = !editor.active || !selectedCell;
+  if(pasteCellBtn) pasteCellBtn.disabled = !editor.active || !selectedCell || !editor.clipboardCell;
   if(undoBtn) undoBtn.disabled = !editor.active || editor.historyIndex <= 0;
   if(redoBtn) redoBtn.disabled = !editor.active || editor.historyIndex >= editor.history.length - 1;
-  if(status) status.textContent = editor.active ? (dirty ? '有未保存修改' : '编辑中') : '';
+  if(status){
+    const dirtyPrefix = dirty ? '有未保存修改 · ' : '';
+    const selectedDetails = editorPlacementDetails(editor.selectedCellKey);
+    const clipboardVisual = editor.clipboardCell ? scheduleVisual(editor.clipboardCell) : null;
+    const clipboardText = String(editor.clipboardCell?.text || '').trim();
+    const clipboardSummary = clipboardText ? `“${clipboardText.split(/\n/)[0].slice(0,14)}${clipboardText.split(/\n/)[0].length > 14 ? '…' : ''}”` : '空白格';
+    if(editor.active && selectedCell && editor.clipboardCell && editor.selectedCellKey !== editor.clipboardSourceKey){
+      status.textContent = `${dirtyPrefix}目标 ${selectedDetails.label} · 粘贴将覆盖为${clipboardSummary}（${clipboardVisual.label}）`;
+    }else if(editor.active && selectedCell && editor.clipboardCell){
+      status.textContent = `${dirtyPrefix}已复制${clipboardSummary}（${clipboardVisual.label}）· 请选择目标格`;
+    }else if(editor.active && selectedCell){
+      status.textContent = `${dirtyPrefix}已选中 ${selectedDetails.label} · 请复制后再选择目标`;
+    }else{
+      status.textContent = editor.active ? (dirty ? '有未保存修改' : '编辑中 · 单击格子进行选择') : '';
+    }
+    status.classList.toggle('has-cell-selection', Boolean(editor.active && selectedCell));
+    status.title = editor.active ? '单击选择格子；⌘/Ctrl+C 复制；⌘/Ctrl+V 粘贴覆盖；双击修改；拖动互换' : '';
+  }
 }
 
 function recordStudentEditorChange(mutator){
   const editor = state.editor;
-  if(!editor.active || !editor.model) return;
+  if(!editor.active || !editor.model) return false;
   const before = studentEditorSnapshot(editor.model);
   mutator();
   const after = studentEditorSnapshot(editor.model);
-  if(before === after) return;
+  if(before === after) return false;
   editor.history = editor.history.slice(0, editor.historyIndex + 1);
   editor.history.push(after);
   editor.historyIndex = editor.history.length - 1;
   editor.dirty = studentEditorIsDirty();
   renderTable();
   updateStudentEditorToolbar();
+  return true;
 }
 
 function closeStudentCellEditor(){
   const popup = state.editor.activeCellEditor;
   if(popup) popup.remove();
   state.editor.activeCellEditor = null;
+}
+
+function cloneStudentEditorCell(cell){
+  if(typeof structuredClone === 'function') return structuredClone(cell || {});
+  return JSON.parse(JSON.stringify(cell || {}));
+}
+
+function selectStudentEditorCell(placement){
+  const editor = state.editor;
+  if(!editor.active || !editor.model?.draft?.[placement]) return;
+  editor.selectedCellKey = placement;
+  document.querySelectorAll('#tbody td.is-selected-cell').forEach(cell=>cell.classList.remove('is-selected-cell'));
+  const selectedCell = [...document.querySelectorAll('#tbody td[data-editor-key]')]
+    .find(cell=>cell.dataset.editorKey === placement);
+  if(selectedCell) selectedCell.classList.add('is-selected-cell');
+  updateStudentEditorToolbar();
+}
+
+function clearStudentEditorCellSelection(){
+  const editor = state.editor;
+  editor.selectedCellKey = '';
+  document.querySelectorAll('#tbody td.is-selected-cell').forEach(cell=>cell.classList.remove('is-selected-cell'));
+  updateStudentEditorToolbar();
+}
+
+function selectedStudentEditorCell(){
+  const editor = state.editor;
+  if(!editor.active || !editor.model || !editor.selectedCellKey) return null;
+  return editor.model.draft[editor.selectedCellKey] || null;
+}
+
+function copySelectedStudentEditorCell(writeSystemClipboard=false, silent=false){
+  const editor = state.editor;
+  const sourceCell = selectedStudentEditorCell();
+  if(!sourceCell){
+    if(!silent) notify('请先单击选择一个课表格子','warning',2600);
+    return null;
+  }
+  editor.clipboardCell = cloneStudentEditorCell(sourceCell);
+  editor.clipboardSourceKey = editor.selectedCellKey;
+  const visual = scheduleVisual(editor.clipboardCell);
+  const text = String(editor.clipboardCell.text || '').trim() || '空白格';
+  if(writeSystemClipboard && navigator.clipboard?.writeText){
+    navigator.clipboard.writeText(String(editor.clipboardCell.text || '')).catch(()=>{});
+  }
+  updateStudentEditorToolbar();
+  if(!silent) notify(`已复制“${text}”及课程类型“${visual.label}”`, 'info', 3000);
+  return editor.clipboardCell;
+}
+
+function studentEditorCellAtPlacement(payload, placement){
+  const editor = state.editor;
+  const details = editorPlacementDetails(placement);
+  const slotIndex = editor.model?.axis?.indexOf(details.time) ?? -1;
+  const copiedCell = cloneStudentEditorCell(payload);
+  return {
+    ...copiedCell,
+    time:details.time,
+    day:details.day,
+    slotIndex,
+    text:String(copiedCell.text || ''),
+    practice:copiedCell.practice === true,
+    rest:copiedCell.rest === true,
+    majorCourse:copiedCell.majorCourse === true,
+    kind:copiedCell.kind || 'course'
+  };
+}
+
+function pasteCopiedStudentEditorCell(payload=state.editor.clipboardCell){
+  const editor = state.editor;
+  const targetPlacement = editor.selectedCellKey;
+  if(!editor.active || !editor.model || !targetPlacement){
+    notify('请先单击选择要覆盖的目标格子','warning',2800);
+    return false;
+  }
+  if(!payload){
+    notify('还没有复制课表格子，请先选择源格并复制','warning',2800);
+    return false;
+  }
+  editor.clipboardCell = cloneStudentEditorCell(payload);
+  const changed = recordStudentEditorChange(()=>{
+    editor.model.draft[targetPlacement] = studentEditorCellAtPlacement(payload,targetPlacement);
+  });
+  if(!changed){
+    notify('目标格子的文字内容和课程类型已经相同','info',2600);
+    return false;
+  }
+  const targetCell = [...document.querySelectorAll('#tbody td[data-editor-key]')]
+    .find(cell=>cell.dataset.editorKey === targetPlacement);
+  if(targetCell){
+    targetCell.classList.add('is-paste-target');
+    setTimeout(()=>targetCell.classList.remove('is-paste-target'),520);
+  }
+  const details = editorPlacementDetails(targetPlacement);
+  const visual = scheduleVisual(payload);
+  notify(`已覆盖 ${details.label}，文字和类型“${visual.label}”均已粘贴`, 'success', 3200);
+  return true;
+}
+
+function studentEditorEventTargetsTextField(event){
+  return event.target instanceof Element
+    && Boolean(event.target.closest('input,textarea,select,[contenteditable="true"],.cell-editor-popup'));
 }
 
 function openStudentCellEditor(td){
@@ -2307,6 +2456,11 @@ function swapStudentEditorCells(from, to){
 function bindStudentEditorGrid(){
   const tbody = document.getElementById('tbody');
   if(!tbody || !state.editor.active) return;
+  tbody.onclick = event=>{
+    if(Date.now() < state.editor.suppressCellClickUntil) return;
+    const td = event.target.closest('td[data-editor-cell]');
+    if(td) selectStudentEditorCell(td.dataset.editorKey);
+  };
   tbody.ondblclick = event=>{
     const td = event.target.closest('td[data-editor-cell]');
     if(td) openStudentCellEditor(td);
@@ -2314,6 +2468,8 @@ function bindStudentEditorGrid(){
   tbody.ondragstart = event=>{
     const td = event.target.closest('td[data-editor-cell]');
     if(!td) return;
+    state.editor.dragging = true;
+    state.editor.suppressCellClickUntil = Date.now() + 400;
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/plain', td.dataset.editorKey);
     td.classList.add('is-dragging');
@@ -2322,6 +2478,9 @@ function bindStudentEditorGrid(){
     const td = event.target.closest('td[data-editor-cell]');
     if(!td) return;
     event.preventDefault();
+    tbody.querySelectorAll('.is-drop-target').forEach(target=>{
+      if(target !== td) target.classList.remove('is-drop-target');
+    });
     td.classList.add('is-drop-target');
   };
   tbody.ondragleave = event=>{
@@ -2334,8 +2493,14 @@ function bindStudentEditorGrid(){
     const from = event.dataTransfer.getData('text/plain');
     if(td) td.classList.remove('is-drop-target');
     if(td && from) swapStudentEditorCells(from, td.dataset.editorKey);
+    state.editor.dragging = false;
+    state.editor.suppressCellClickUntil = Date.now() + 250;
   };
-  tbody.ondragend = ()=>tbody.querySelectorAll('.is-dragging,.is-drop-target').forEach(el=>el.classList.remove('is-dragging','is-drop-target'));
+  tbody.ondragend = ()=>{
+    state.editor.dragging = false;
+    state.editor.suppressCellClickUntil = Date.now() + 250;
+    tbody.querySelectorAll('.is-dragging,.is-drop-target').forEach(element=>element.classList.remove('is-dragging','is-drop-target'));
+  };
 }
 
 function updateScheduleEmptyState(){
@@ -2397,6 +2562,7 @@ function renderTable(){
         td.dataset.editorCell='1';
         td.dataset.editorKey=editorPlacementKey(timeLabel,d);
         td.draggable=true;
+        if(editor.selectedCellKey === td.dataset.editorKey) td.classList.add('is-selected-cell');
       }
 
       if(d===2){ td.title=timeLabel; }
@@ -2656,6 +2822,11 @@ function startStudentEditor(student, options={}){
   editor.history = [studentEditorSnapshot(editor.model)];
   editor.historyIndex = 0;
   editor.dirty = editor.isNew;
+  editor.selectedCellKey = '';
+  editor.clipboardCell = null;
+  editor.clipboardSourceKey = '';
+  editor.dragging = false;
+  editor.suppressCellClickUntil = 0;
   document.getElementById('editStudentName').value = student.name || '';
   document.getElementById('editStudentGrade').value = student.grade || '';
   document.getElementById('editStudentMajor').value = student.major || '';
@@ -2680,6 +2851,11 @@ function stopStudentEditor(force=false){
   editor.historyIndex = -1;
   editor.dirty = false;
   editor.metaSnapshot = '';
+  editor.selectedCellKey = '';
+  editor.clipboardCell = null;
+  editor.clipboardSourceKey = '';
+  editor.dragging = false;
+  editor.suppressCellClickUntil = 0;
   if(isNew){
     const index = state.students.findIndex(student=>student.id === studentId);
     if(index >= 0) state.students.splice(index,1);
@@ -3690,6 +3866,8 @@ document.getElementById('btnEditStudent').addEventListener('click', ()=>{
   startStudentEditor(state.students[state.currentIndex]);
 });
 document.getElementById('btnApplyStudentTemplate').addEventListener('click',openExistingStudentTemplateForm);
+document.getElementById('btnCopyStudentCell').addEventListener('click',()=>copySelectedStudentEditorCell(true));
+document.getElementById('btnPasteStudentCell').addEventListener('click',()=>pasteCopiedStudentEditorCell());
 document.getElementById('btnSaveStudent').addEventListener('click', saveCurrentStudentSchedule);
 document.getElementById('btnCancelStudent').addEventListener('click', ()=>stopStudentEditor(false));
 document.getElementById('btnUndoStudent').addEventListener('click', ()=>{
@@ -3715,6 +3893,42 @@ document.getElementById('btnRedoStudent').addEventListener('click', ()=>{
     state.editor.dirty = studentEditorIsDirty();
     updateStudentEditorToolbar();
   });
+});
+
+document.addEventListener('copy',event=>{
+  if(!state.editor.active || state.editor.dragging || studentEditorEventTargetsTextField(event)) return;
+  const copiedCell = copySelectedStudentEditorCell(false,true);
+  if(!copiedCell) return;
+  event.preventDefault();
+  event.clipboardData?.setData('text/plain',String(copiedCell.text || ''));
+  try{
+    event.clipboardData?.setData('application/x-ymsq-schedule-cell',JSON.stringify({version:1,cell:copiedCell}));
+  }catch(_){ }
+});
+
+document.addEventListener('paste',event=>{
+  const editor = state.editor;
+  if(!editor.active || editor.dragging || studentEditorEventTargetsTextField(event) || !editor.selectedCellKey) return;
+  let clipboardCell = null;
+  const encodedCell = event.clipboardData?.getData('application/x-ymsq-schedule-cell') || '';
+  if(encodedCell){
+    try{
+      const parsed = JSON.parse(encodedCell);
+      if(parsed?.version === 1 && parsed.cell) clipboardCell = parsed.cell;
+    }catch(_){ }
+  }
+  if(!clipboardCell && editor.clipboardCell){
+    const plainText = event.clipboardData?.getData('text/plain');
+    if(plainText === String(editor.clipboardCell.text || '')) clipboardCell = editor.clipboardCell;
+  }
+  if(!clipboardCell) return;
+  event.preventDefault();
+  pasteCopiedStudentEditorCell(clipboardCell);
+});
+
+document.addEventListener('keydown',event=>{
+  if(event.key !== 'Escape' || !state.editor.active || studentEditorEventTargetsTextField(event)) return;
+  if(state.editor.selectedCellKey) clearStudentEditorCellSelection();
 });
 
 document.getElementById('btnPrev').addEventListener('click',()=>{
@@ -4390,6 +4604,11 @@ async function saveCurrentStudentSchedule(){
     editor.historyIndex = -1;
     editor.dirty = false;
     editor.metaSnapshot = '';
+    editor.selectedCellKey = '';
+    editor.clipboardCell = null;
+    editor.clipboardSourceKey = '';
+    editor.dragging = false;
+    editor.suppressCellClickUntil = 0;
     closeStudentCellEditor();
     renderTable();
     updateStudentEditorToolbar();
